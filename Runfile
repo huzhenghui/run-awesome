@@ -13,43 +13,22 @@ run-choose:
 builtin-run-list:
     run list
 
-##
-# Buiiltin Command : run help
-# Description : run help
-builtin-run-help:
-    run help
+root_dir := "$(pwd)"
+draft_dir := "$(jump cd run-draft)"
 
 ##
-# Buiiltin Command : run version
-# Description : run version
-builtin-run-version:
-    run version
+# Display run draft dir
+# Fetch run draft dir by : jump cd run-draft
+# run draft dir is : ${draft_dir}
+# EXPORT draft_dir
+run-draft-dir:
+    echo "${draft_dir}"
 
 ##
-# .RUN Attribute
-# Absolute path of the run binary currently in use
-# EXPORT dot_RUN := ${.RUN}
-attribute-RUN:
-    echo ${dot_RUN}
-
-##
-# .RUNFILE Attribute
-# Absolute path of the current Runfile
-# EXPORT dot_RUNFILE := ${.RUNFILE}
-attribute-RUNFILE:
-    echo ${dot_RUNFILE}
-
-##
-# Default Shell
-# Default Shell is ${.SHELL}
-default_shell:
-    ps -p $$
-
-##
-# Use bash Shell
-# This Command use Shell is ${.SHELL}
-use_bash (bash):
-    ps -p $$
+# Open run awesome by Code
+# EXPORT root_dir
+code:
+    code "${root_dir}"
 
 ##
 # Commands list
