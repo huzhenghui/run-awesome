@@ -1,0 +1,92 @@
+##
+# Choose Recipe by Choose-GUI
+# Description : Choose Recipe by Choose-GUI
+run-choose:
+    echo choose
+    choose_recipe=$(run run-Commands-recipe | /usr/local/opt/choose-gui/bin/choose)
+    echo "Choose Recipe: ${choose_recipe}"
+    run "${choose_recipe}"
+
+##
+# Buiiltin Command : run list
+# Description : run list
+builtin-run-list:
+    run list
+
+##
+# Buiiltin Command : run help
+# Description : run help
+builtin-run-help:
+    run help
+
+##
+# Buiiltin Command : run version
+# Description : run version
+builtin-run-version:
+    run version
+
+##
+# .RUN Attribute
+# Absolute path of the run binary currently in use
+# EXPORT dot_RUN := ${.RUN}
+attribute-RUN:
+    echo ${dot_RUN}
+
+##
+# .RUNFILE Attribute
+# Absolute path of the current Runfile
+# EXPORT dot_RUNFILE := ${.RUNFILE}
+attribute-RUNFILE:
+    echo ${dot_RUNFILE}
+
+##
+# Default Shell
+# Default Shell is ${.SHELL}
+default_shell:
+    ps -p $$
+
+##
+# Use bash Shell
+# This Command use Shell is ${.SHELL}
+use_bash (bash):
+    ps -p $$
+
+##
+# Commands list
+# Display Commands list, include Builtins and Recipes
+run-Commands:
+    run list 2>&1 | awk '
+    {
+        if ("Usage:" == $0)
+            section = "Usage"
+    }
+    {
+        if ("Commands" == section)
+            print;
+    }
+    {
+        if ("Commands:" == $0)
+            section = "Commands"
+    }
+    '
+##
+# Builtins Commands list
+# Display Builtins Commands list only
+run-Commands-builtin:
+    run run-Commands | awk '
+    {
+        if ("(builtin)" == $2)
+            print $1;
+    }
+    '
+
+##
+# Recipes Commands list
+# Display Recipes Commands list only
+run-Commands-recipe:
+    run run-Commands | awk '
+    {
+        if ("(builtin)" != $2)
+            print $1;
+    }
+    '
