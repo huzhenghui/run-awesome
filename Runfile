@@ -15,6 +15,7 @@ builtin-run-list:
 
 root_dir := "$(pwd)"
 draft_dir := "$(jump cd run-draft)"
+EXPORT code_workspace := "${root_dir}/run.code-workspace"
 
 ##
 # Display run draft dir
@@ -28,7 +29,11 @@ run-draft-dir:
 # Open run awesome by Code
 # EXPORT root_dir
 code:
-    code "${root_dir}"
+    if [ -f "${code_workspace}" ]; then
+        code "${code_workspace}";
+    else
+        code "${root_dir}";
+    fi
 
 ##
 # Commands list
