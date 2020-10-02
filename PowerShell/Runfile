@@ -1,0 +1,142 @@
+# Commands
+
+##
+# Choose Recipe by fzf
+# Description : Choose Recipe by fzf
+run-fzf (pwsh):
+    run run-commands |
+        run run-Commands-visible-filter |
+        /usr/local/opt/fzf/bin/fzf --tac |
+        Set-Variable -Name recipe
+    "Choose Recipe : {0}" -f $recipe
+    $recipe |
+        Select-String -Pattern "[^ ]+" |
+        Where-Object {$_.Matches.Length -eq 1} |
+        ForEach-Object {$_.Matches[0].Value} |
+        Set-Variable -Name CommandName
+    "Task : {0}" -f $CommandName
+    run help $CommandName
+    run $CommandName
+
+##
+# Builtin Command : run list
+# Description : run list
+run-builtin-list (pwsh):
+    run list 2>&1
+
+##
+# Commands list
+# Description : Display Commands list
+run-commands (pwsh):
+    run run-builtin-list |
+        run run-Commands-section-extractor
+
+##
+# Builtins Commands list
+# Description : Display Builtins Commands list only
+run-commands-builtin (pwsh):
+    run run-commands |
+        run Run-commands-builtin-filter
+
+##
+# Recipes Commands list
+# Display Recipes Commands list only
+run-commands-recipe (pwsh):
+    run run-commands |
+        run Run-commands-builtin-filter -r |
+        run run-commands-visible-filter
+
+# Code
+
+##
+# Display run draft dir
+# Fetch run draft dir by : jump cd run-draft
+run-draft-dir (pwsh):
+    jump cd run-draft
+
+##
+# Open run awesome by Code
+code (pwsh):
+    $(Set-Location "$(git rev-parse --show-toplevel)"; Get-Location) |
+        Set-Variable -Name RootDir
+    $CodeWorkspace = -Join ($RootDir, "\mask.code-workspace")
+    if (Test-Path $CodeWorkspace) {
+        code $CodeWorkspace
+    } else {
+        code $RootDir
+    }
+
+##
+# Get Run Command Line
+# Description : Get the command line that current running
+run-command-line (pwsh):
+    ps -o command $pid |
+        Select-Object -Last 1
+
+##
+# Get Run File Name
+# Description : Get the file name that current running
+run-runfile-name (pwsh):
+    ps -o command $pid |
+        Select-Object -Last 1 |
+        Select-String -Pattern "^[^ ]+ +(.*)$" |
+        Where-Object { $_.Matches.Length -eq 1 } |
+        ForEach-Object {$_.Matches[0].Groups[1].Value}
+
+##
+# Get Run File Content
+# Description : Get the content of file that current running
+run-runfile-content (pwsh):
+    ps -o command $pid |
+        Select-Object -Last 1 |
+        Select-String -Pattern "^[^ ]+ +(.*)$" |
+        Where-Object { $_.Matches.Length -eq 1 } |
+        ForEach-Object {
+            Get-Content $_.Matches[0].Groups[1].Value
+        }
+
+##
+# Get OPTION in PowerShell
+# Description : Get OPTION in PowerShell
+# OPTION NAME -n,--name <name> Name to get
+run-option (pwsh):
+    Write-Output $env:NAME
+
+##
+# (hidden) Extract 'Commands:' section from run list, hide in interactive list
+run-commands-section-extractor (pwsh):
+    $input |
+        ForEach-Object {
+            if ("Usage:" -eq $_) {
+                $section = $_
+            }
+            if ("Commands:" -eq $section) {
+                $_.TrimStart()
+            }
+            if ("Commands:" -eq $_) {
+                $section = $_
+            }
+        }
+
+##
+# (hidden) Filter Command Title Line by builtin
+# Description : Filter Command Title Line by builtin
+# OPTION Reverse -r,--reverse hide builtin
+run-commands-builtin-filter (pwsh):
+    $input |
+        ForEach-Object {
+            if (( -not ($_ | Select-String -Pattern "[^ ]+ +\(builtin\) ")) -eq $env:Reverse) {
+                $_
+            }
+        }
+
+##
+# (hidden) Filter : Show visible Command only
+# Description : Output no (hidden) line
+run-Commands-visible-filter (pwsh):
+    $input |
+        ForEach-Object {
+            if ($_ -NotMatch "^[^ ]+ +\(hidden\) ") {
+                $_
+            }
+        }

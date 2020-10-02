@@ -8,7 +8,7 @@ run-choose:
     run "${choose_recipe}"
 
 ##
-# Buiiltin Command : run list
+# Builtin Command : run list
 # Description : run list
 builtin-run-list:
     run list
