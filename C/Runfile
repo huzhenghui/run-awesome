@@ -1,0 +1,14 @@
+use_gcc:
+    #!/usr/bin/env sh
+    sed -n -e '7,$p' < "$0" | gcc -x c -o "$0.$$.out" -
+    $0.$$.out "$0" "$@"
+    STATUS=$?
+    rm $0.$$.out
+    exit $STATUS
+    #include <stdio.h>
+
+    int main(int argc, char ** argv)
+    {
+        printf("Hello, world from c!\n");
+        return 0;
+    }
